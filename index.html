@@ -386,9 +386,37 @@
         </div>
     </div>
 
+    <!-- Firebase Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBr1A7LaeWb0r6S2OeaMm65JY4a5rYGNIo",
+            authDomain: "site-contabil-7396e.firebaseapp.com",
+            databaseURL: "https://site-contabil-7396e-default-rtdb.firebaseio.com",
+            projectId: "site-contabil-7396e",
+            storageBucket: "site-contabil-7396e.firebasestorage.app",
+            messagingSenderId: "560732345394",
+            appId: "1:560732345394:web:a503e990841e228517982b",
+            measurementId: "G-B26N7LGHSY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(app);
+
+        // Initialize App Logic with Firebase
+        if (window.initAppWithFirebase) {
+            window.initAppWithFirebase({ db, ref, set, onValue, remove, update });
+        }
+    </script>
+
     <script>
         // --- ESTADO GLOBAL ---
-        let expenses = JSON.parse(localStorage.getItem('finances_data')) || [];
+        let expenses = [];
+        let firebaseApi = null;
         let currentView = 'dashboard';
         let uploadedImages = [];
         let dashboardDate = new Date().toISOString().slice(0, 7);
@@ -398,6 +426,37 @@
         let dashboardCharts = {};
         let deferredPrompt;
         let searchTimeout;
+
+        // --- FIREBASE BRIDGE ---
+        window.initAppWithFirebase = (api) => {
+            firebaseApi = api;
+            const { db, ref, onValue, set } = api;
+            
+            // Realtime Listener
+            onValue(ref(db, 'expenses'), (snapshot) => {
+                const val = snapshot.val();
+                if (val) {
+                    // Convert Object Map to Array and Sort by ID (Timestamp) descending
+                    expenses = Object.values(val).sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+                } else {
+                    // Migration: Upload LocalStorage if DB is empty
+                    const localData = localStorage.getItem('finances_data');
+                    if (localData) {
+                        try {
+                            const parsed = JSON.parse(localData);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                const updates = {};
+                                parsed.forEach(p => updates[p.id] = p);
+                                set(ref(db, 'expenses'), updates);
+                                localStorage.removeItem('finances_data'); // Clear local after sync
+                            }
+                        } catch(e) { console.error("Migration error", e); }
+                    }
+                    expenses = [];
+                }
+                renderView();
+            });
+        };
 
         const suggestedCategories = ['Habitação', 'Alimentação', 'Transporte', 'Contas Fixas', 'Lazer', 'Saúde', 'Educação', 'Outros'];
 
@@ -1131,7 +1190,10 @@
                     }
                 }
 
-                localStorage.setItem('finances_data', JSON.stringify(expenses));
+                if (firebaseApi) {
+                    const { db, ref, update } = firebaseApi;
+                    update(ref(db, 'expenses/' + id), expense);
+                }
                 toggleModal('payment-modal', false);
                 
                 // Se estiver na lista, atualiza. Se estiver no dashboard, atualiza.
@@ -1157,7 +1219,10 @@
                 
                 // Se marcou como pago e tem recorrência, poderia sugerir criar o próximo (feature futura)
                 
-                localStorage.setItem('finances_data', JSON.stringify(expenses));
+                if (firebaseApi) {
+                    const { db, ref, update } = firebaseApi;
+                    update(ref(db, 'expenses/' + id), { status: newStatus });
+                }
                 renderList(document.getElementById('content-area'));
             }
         }
@@ -1176,7 +1241,10 @@
                     if (idx > -1) {
                         if (!expenses[idx].receiptImages) expenses[idx].receiptImages = [];
                         expenses[idx].receiptImages.push(base64);
-                        localStorage.setItem('finances_data', JSON.stringify(expenses));
+                        if (firebaseApi) {
+                            const { db, ref, update } = firebaseApi;
+                            update(ref(db, 'expenses/' + currentUploadId), { receiptImages: expenses[idx].receiptImages });
+                        }
                         renderList(document.getElementById('content-area'));
                     }
                     currentUploadId = null;
@@ -1341,9 +1409,10 @@
                 }
             }
 
-            expenses.unshift(newExpense);
-            localStorage.setItem('finances_data', JSON.stringify(expenses));
-            switchView('list');
+            if (firebaseApi) {
+                const { db, ref, set } = firebaseApi;
+                set(ref(db, 'expenses/' + newExpense.id), newExpense).then(() => switchView('list'));
+            }
         }
 
         function deleteExpense(id) {
@@ -1351,8 +1420,10 @@
             if (!exp) return;
 
             if (confirm("Deseja realmente excluir este registro?")) {
-                expenses = expenses.filter(e => e.id !== id);
-                localStorage.setItem('finances_data', JSON.stringify(expenses));
+                if (firebaseApi) {
+                    const { db, ref, remove } = firebaseApi;
+                    remove(ref(db, 'expenses/' + id));
+                }
                 renderView();
             }
         }
@@ -1620,10 +1691,13 @@
                     const data = JSON.parse(e.target.result);
                     if (Array.isArray(data)) {
                         if (confirm(`Deseja substituir os dados atuais por ${data.length} registros do backup?`)) {
-                            expenses = data;
-                            localStorage.setItem('finances_data', JSON.stringify(expenses));
-                            alert('Dados restaurados com sucesso!');
-                            location.reload();
+                            if (firebaseApi) {
+                                const updates = {};
+                                data.forEach(p => updates[p.id] = p);
+                                const { db, ref, set } = firebaseApi;
+                                set(ref(db, 'expenses'), updates);
+                                alert('Dados restaurados com sucesso!');
+                            }
                         }
                     } else {
                         alert('Arquivo de backup inválido: O formato deve ser uma lista de registros.');
