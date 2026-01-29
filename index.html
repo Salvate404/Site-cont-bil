@@ -351,6 +351,23 @@
         </div>
     </div>
 
+    <!-- Modal Detalhes do Histórico -->
+    <div id="history-modal" class="hidden fixed inset-0 bg-slate-900/80 z-[60] flex items-center justify-center p-4" onclick="if(event.target === this) toggleModal('history-modal', false)">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md p-6 animate-slideUp relative">
+            <button onclick="toggleModal('history-modal', false)" class="absolute top-4 right-4 p-2 bg-slate-50 dark:bg-slate-700 text-slate-400 rounded-full hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">📜</div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Detalhes do Pagamento</h3>
+            </div>
+            
+            <div id="history-content" class="space-y-4">
+                <!-- Conteúdo injetado via JS -->
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Galeria Imagens -->
     <div id="gallery-modal" class="hidden fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center p-4" onclick="toggleModal('gallery-modal', false)">
         <div class="relative max-w-4xl w-full flex flex-col items-center" onclick="event.stopPropagation()">
@@ -1040,12 +1057,7 @@
                                 `).join('')}
                                 ${e.receiptImages.length > 3 ? `<div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 border-2 border-white dark:border-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-500">+${e.receiptImages.length - 3}</div>` : ''}
                             </div>
-                        ` : `
-                            <button onclick="event.stopPropagation(); triggerCardUpload('${e.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-700/50 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-xs font-bold border border-dashed border-slate-200 dark:border-slate-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                                Anexar Comprovante
-                            </button>
-                        `}
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -1642,7 +1654,11 @@
             const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
             const finalDay = Math.min(parseInt(dueDay), daysInMonth);
             
-            return new Date(targetYear, targetMonth, finalDay).toLocaleDateString('pt-BR');
+            const nextDate = new Date(targetYear, targetMonth, finalDay);
+            const yearStr = nextDate.getFullYear();
+            const monthStr = String(nextDate.getMonth() + 1).padStart(2, '0');
+            const dayStr = String(nextDate.getDate()).padStart(2, '0');
+            return `${yearStr}-${monthStr}-${dayStr}`;
         }
 
         function formatCurrency(input) {
@@ -1707,8 +1723,8 @@
                     </button>
                     
                     <div id="history-list" class="hidden mt-4 space-y-2">
-                        ${history.length > 0 ? history.map(h => `
-                            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-transparent hover:border-indigo-100">
+                        ${history.length > 0 ? history.map((h, idx) => `
+                            <div onclick="openHistoryDetails('${e.id}', ${idx})" class="cursor-pointer flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-transparent hover:border-indigo-100 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all">
                                 <div class="flex items-center gap-3">
                                     <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
                                     <span class="text-sm font-bold text-slate-700 dark:text-slate-200">${h.datePaid.split('-').reverse().join('/')} <span class="text-xs text-slate-400 font-normal">(Ref: ${h.originalDate.split('-').reverse().join('/')})</span></span>
@@ -1720,6 +1736,90 @@
                 </div>
             `;
             toggleModal('details-modal', true);
+        }
+
+        function openHistoryDetails(id, sortedIndex) {
+            const e = expenses.find(exp => exp.id === id);
+            if (!e || !e.paymentHistory) return;
+            
+            // Re-sort to match the index from openDetails
+            const history = [...e.paymentHistory].sort((a,b) => new Date(b.datePaid) - new Date(a.datePaid));
+            const item = history[sortedIndex];
+            if (!item) return;
+
+            const container = document.getElementById('history-content');
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
+                            <p class="text-xs font-bold text-slate-400 uppercase">Data Pagamento</p>
+                            <p class="text-base font-bold text-slate-800 dark:text-white">${item.datePaid.split('-').reverse().join('/')}</p>
+                        </div>
+                        <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                            <p class="text-xs font-bold text-emerald-600/70 uppercase">Valor Pago</p>
+                            <p class="text-base font-black text-emerald-600">R$ ${parseFloat(item.amount).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-1">Referente ao Vencimento</p>
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">${item.originalDate.split('-').reverse().join('/')}</p>
+                    </div>
+
+                    ${item.notes ? `
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-1">Anotações</p>
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700 rounded-xl border border-slate-100 dark:border-slate-600">
+                            <p class="text-sm text-slate-600 dark:text-slate-300 italic">"${item.notes}"</p>
+                        </div>
+                    </div>` : ''}
+                    
+                    ${item.receiptImages && item.receiptImages.length > 0 ? `
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-2">Comprovantes Anexados</p>
+                        <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                            ${item.receiptImages.map((img, i) => `
+                                <div onclick="openHistoryGallery('${id}', ${sortedIndex}, ${i})" class="flex-shrink-0 w-16 h-16 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity">
+                                    ${img.startsWith('data:application/pdf') ? 
+                                        '<div class="w-full h-full bg-red-50 flex items-center justify-center text-[8px] font-bold text-red-500">PDF</div>' : 
+                                        `<img src="${img}" class="w-full h-full object-cover">`
+                                    }
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
+                </div>
+            `;
+            toggleModal('history-modal', true);
+        }
+
+        function openHistoryGallery(id, historyIndex, imgIndex) {
+            const e = expenses.find(exp => exp.id === id);
+            if (!e) return;
+            const history = [...e.paymentHistory].sort((a,b) => new Date(b.datePaid) - new Date(a.datePaid));
+            const item = history[historyIndex];
+            if (!item || !item.receiptImages) return;
+            
+            // Reuse the existing gallery modal logic manually since openGallery is tied to expense.receiptImages
+            const images = item.receiptImages;
+            const img = document.getElementById('gallery-img');
+            const thumbs = document.getElementById('gallery-thumbs');
+            
+            if (images[imgIndex].startsWith('data:application/pdf')) {
+                const pdfWindow = window.open("");
+                pdfWindow.document.write(`<iframe width='100%' height='100%' src='${images[imgIndex]}'></iframe>`);
+                return;
+            } else {
+                img.src = images[imgIndex];
+            }
+            
+            thumbs.innerHTML = images.map((src, i) => `
+                <button onclick='updateGallery("${src}", ${i})' class="w-16 h-16 rounded-xl border-2 transition-all overflow-hidden ${i === imgIndex ? 'border-indigo-500 scale-110' : 'border-transparent opacity-50'}">
+                    ${src.startsWith('data:application/pdf') ? '<div class="w-full h-full bg-red-50 flex items-center justify-center text-[8px] font-bold text-red-500">PDF</div>' : `<img src="${src}" class="w-full h-full object-cover">`}
+                </button>
+            `).join('');
+            
+            toggleModal('gallery-modal', true);
         }
 
         function getIcon(cat) {
