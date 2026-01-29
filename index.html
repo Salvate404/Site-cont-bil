@@ -445,7 +445,7 @@
 
         function startDataSync() {
             if (!firebaseApi || !currentUser) return;
-            const { db, ref, onValue, set } = api;
+            const { db, ref, onValue, set } = firebaseApi;
             
             onValue(ref(db, 'expenses/' + currentUser), (snapshot) => {
                 const val = snapshot.val();
