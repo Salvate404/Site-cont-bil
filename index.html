@@ -573,6 +573,7 @@
                 if (firebaseApi) startDataSync();
                 checkOnlineStatus(); // Verifica status inicial
                 processSyncQueue();  // Tenta processar fila pendente
+                setupBackgroundSync(currentUser); // Configura notificações de fundo
             } else if (savedCreds) {
                 // Pre-fill form if credentials are saved
                 try {
@@ -652,6 +653,7 @@
             document.getElementById('app-container').classList.remove('hidden');
             loadApp();
             startDataSync();
+            setupBackgroundSync(nickname);
         }
 
         function logout() {
@@ -689,6 +691,28 @@
                 navigator.serviceWorker.register('./sw.js')
                     .then(() => console.log('Service Worker registrado!'))
                     .catch(err => console.error('Falha no SW:', err));
+            }
+        }
+
+        // --- CONFIGURAÇÃO DE BACKGROUND SYNC ---
+        async function setupBackgroundSync(user) {
+            if ('serviceWorker' in navigator && user) {
+                const reg = await navigator.serviceWorker.ready;
+                
+                // Envia o usuário atual para o Service Worker salvar
+                reg.active.postMessage({ type: 'SET_USER', user });
+
+                // Tenta registrar a tarefa periódica (Funciona no Android/Chrome)
+                if ('periodicSync' in reg) {
+                    try {
+                        await reg.periodicSync.register('check-bills', {
+                            minInterval: 12 * 60 * 60 * 1000 // Tenta verificar a cada 12h (o navegador decide o tempo exato)
+                        });
+                        console.log('Sincronização de fundo registrada!');
+                    } catch (e) {
+                        console.log('Background Sync não suportado neste navegador.');
+                    }
+                }
             }
         }
 
