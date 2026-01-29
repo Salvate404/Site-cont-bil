@@ -198,8 +198,16 @@
         <!-- Main Content -->
         <main class="flex-1 flex flex-col h-screen overflow-hidden pb-20 md:pb-0 relative">
             <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-3 md:px-6 md:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sticky top-0 z-10 transition-colors shadow-sm">
+                <!-- Aviso Offline -->
+                <div id="offline-banner" class="hidden w-full bg-amber-500 text-white text-xs font-bold text-center py-1 absolute top-0 left-0 z-50">
+                    📡 Modo Offline - Alterações serão salvas ao reconectar
+                </div>
+
                 <div>
-                    <h2 class="text-lg md:text-xl font-semibold text-slate-800 dark:text-white" id="header-title">Dashboard</h2>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-lg md:text-xl font-semibold text-slate-800 dark:text-white" id="header-title">Dashboard</h2>
+                        <div id="sync-status" class="text-emerald-500 transition-colors duration-300" title="Sincronizado"></div>
+                    </div>
                     <p class="text-xs md:text-sm text-slate-500 hidden md:block">Gestão contábil simples e organizada</p>
                 </div>
 
@@ -519,6 +527,7 @@
                 if (val) {
                     // Convert Object Map to Array and Sort by ID (Timestamp) descending
                     expenses = Object.values(val).sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+                    localStorage.setItem('offline_cache', JSON.stringify(expenses)); // Salva cache para uso offline
                 } else {
                     // Migration: Upload LocalStorage if DB is empty
                     const localData = localStorage.getItem('finances_data');
@@ -549,6 +558,10 @@
             const storedUser = localStorage.getItem('app_user');
             const savedCreds = localStorage.getItem('app_saved_creds');
             
+            // Carrega cache offline se existir
+            const cached = localStorage.getItem('offline_cache');
+            if (cached) expenses = JSON.parse(cached);
+            
             // Limpeza de segurança para evitar conflito com versão antiga
             sessionStorage.removeItem('app_session');
 
@@ -558,6 +571,8 @@
                 document.getElementById('app-container').classList.remove('hidden');
                 loadApp();
                 if (firebaseApi) startDataSync();
+                checkOnlineStatus(); // Verifica status inicial
+                processSyncQueue();  // Tenta processar fila pendente
             } else if (savedCreds) {
                 // Pre-fill form if credentials are saved
                 try {
@@ -650,6 +665,8 @@
             initTheme(); // Ensure theme loads first
             initAuth();
             registerSW();
+            window.addEventListener('online', () => { checkOnlineStatus(); processSyncQueue(); });
+            window.addEventListener('offline', () => { checkOnlineStatus(); });
             setInterval(checkNotifications, 3 * 60 * 60 * 1000); // Verifica a cada 3 horas
         };
 
@@ -691,6 +708,121 @@
                 deferredPrompt = null;
                 document.getElementById('install-btn').classList.add('hidden');
             }
+        }
+
+        // --- SISTEMA OFFLINE / SYNC ---
+        function updateSyncStatus(status) {
+            const iconContainer = document.getElementById('sync-status');
+            if (!iconContainer) return;
+
+            let iconHtml = '';
+            let title = '';
+            let colorClass = '';
+
+            if (status === 'saving') {
+                // Cloud Upload / Pulse
+                iconHtml = `<svg class="animate-pulse" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>`;
+                title = 'Salvando...';
+                colorClass = 'text-indigo-500';
+            } else if (status === 'offline') {
+                // Cloud Off
+                iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`;
+                title = 'Offline (Salvo localmente)';
+                colorClass = 'text-amber-500';
+            } else if (status === 'synced') {
+                // Cloud Check
+                iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18.5a6.5 6.5 0 1 0-4.5-11.5A6.5 6.5 0 0 0 12 5a7 7 0 0 1 7 7c0 3.5-2.5 6-6 6"/><path d="m9 13 2 2 4-4"/></svg>`;
+                title = 'Sincronizado';
+                colorClass = 'text-emerald-500';
+            }
+
+            iconContainer.innerHTML = iconHtml;
+            iconContainer.className = `${colorClass} transition-colors duration-300`;
+            iconContainer.title = title;
+        }
+
+        function checkOnlineStatus() {
+            const banner = document.getElementById('offline-banner');
+            const queue = JSON.parse(localStorage.getItem('sync_queue') || '[]');
+            
+            if (!navigator.onLine) {
+                banner.classList.remove('hidden');
+                updateSyncStatus('offline');
+            } else {
+                banner.classList.add('hidden');
+                if (queue.length > 0) updateSyncStatus('saving');
+                else updateSyncStatus('synced');
+            }
+        }
+
+        async function dbAction(method, path, data = null) {
+            updateSyncStatus('saving');
+            // Se online e conectado ao Firebase
+            if (navigator.onLine && firebaseApi) {
+                const { db, ref, set, update, remove } = firebaseApi;
+                const dbRef = ref(db, path);
+                try {
+                    if (method === 'set') await set(dbRef, data);
+                    else if (method === 'update') await update(dbRef, data);
+                    else if (method === 'remove') await remove(dbRef);
+                    updateSyncStatus('synced');
+                    return true;
+                } catch (e) {
+                    console.error("Erro online, tentando fila offline...", e);
+                    // Se falhar (ex: internet caiu no meio), cai no fallback abaixo
+                }
+            }
+
+            // Se offline ou falha
+            const action = { method, path, data, timestamp: Date.now() };
+            const queue = JSON.parse(localStorage.getItem('sync_queue') || '[]');
+            queue.push(action);
+            localStorage.setItem('sync_queue', JSON.stringify(queue));
+            
+            // Atualização Otimista (Atualiza a tela na hora)
+            applyOptimisticUpdate(method, path, data);
+            checkOnlineStatus(); // Mostra banner
+            return true;
+        }
+
+        function applyOptimisticUpdate(method, path, data) {
+            // path ex: expenses/USUARIO/ID
+            const parts = path.split('/');
+            if (parts[0] !== 'expenses' || parts.length < 3) return;
+            const id = parts[2];
+
+            if (method === 'set') {
+                // Adicionar ou Substituir
+                const idx = expenses.findIndex(e => e.id === id);
+                if (idx > -1) expenses[idx] = data;
+                else expenses.unshift(data);
+            } else if (method === 'update') {
+                // Atualizar parcial
+                const idx = expenses.findIndex(e => e.id === id);
+                if (idx > -1) {
+                    expenses[idx] = { ...expenses[idx], ...data };
+                }
+            } else if (method === 'remove') {
+                // Remover
+                expenses = expenses.filter(e => e.id !== id);
+            }
+            
+            // Salva no cache local para persistir se fechar o app
+            localStorage.setItem('offline_cache', JSON.stringify(expenses));
+            renderView();
+        }
+
+        async function processSyncQueue() {
+            if (!navigator.onLine || !firebaseApi) return;
+            const queue = JSON.parse(localStorage.getItem('sync_queue') || '[]');
+            if (queue.length === 0) return;
+
+            // Processa item por item
+            for (const item of queue) {
+                await dbAction(item.method, item.path, item.data);
+            }
+            
+            localStorage.removeItem('sync_queue');
         }
 
         // --- TEMA ---
@@ -1417,10 +1549,7 @@
                     }
                 }
 
-                if (firebaseApi) {
-                    const { db, ref, update } = firebaseApi;
-                    update(ref(db, `expenses/${currentUser}/${id}`), expense);
-                }
+                dbAction('update', `expenses/${currentUser}/${id}`, expense);
                 toggleModal('payment-modal', false);
                 
                 // Se estiver na lista, atualiza. Se estiver no dashboard, atualiza.
@@ -1446,10 +1575,7 @@
                 
                 // Se marcou como pago e tem recorrência, poderia sugerir criar o próximo (feature futura)
                 
-                if (firebaseApi) {
-                    const { db, ref, update } = firebaseApi;
-                    update(ref(db, `expenses/${currentUser}/${id}`), { status: newStatus });
-                }
+                dbAction('update', `expenses/${currentUser}/${id}`, { status: newStatus });
                 renderList(document.getElementById('content-area'));
             }
         }
@@ -1468,10 +1594,7 @@
                     if (idx > -1) {
                         if (!expenses[idx].receiptImages) expenses[idx].receiptImages = [];
                         expenses[idx].receiptImages.push(base64);
-                        if (firebaseApi) {
-                            const { db, ref, update } = firebaseApi;
-                            update(ref(db, `expenses/${currentUser}/${currentUploadId}`), { receiptImages: expenses[idx].receiptImages });
-                        }
+                        dbAction('update', `expenses/${currentUser}/${currentUploadId}`, { receiptImages: expenses[idx].receiptImages });
                         renderList(document.getElementById('content-area'));
                     }
                     currentUploadId = null;
@@ -1636,10 +1759,7 @@
                 }
             }
 
-            if (firebaseApi) {
-                const { db, ref, set } = firebaseApi;
-                set(ref(db, `expenses/${currentUser}/${newExpense.id}`), newExpense).then(() => switchView('list'));
-            }
+            dbAction('set', `expenses/${currentUser}/${newExpense.id}`, newExpense).then(() => switchView('list'));
         }
 
         function deleteExpense(id) {
@@ -1647,10 +1767,7 @@
             if (!exp) return;
 
             if (confirm("Deseja realmente excluir este registro?")) {
-                if (firebaseApi) {
-                    const { db, ref, remove } = firebaseApi;
-                    remove(ref(db, `expenses/${currentUser}/${id}`));
-                }
+                dbAction('remove', `expenses/${currentUser}/${id}`);
                 renderView();
             }
         }
@@ -1916,6 +2033,7 @@
             reader.onload = (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
+                    if (!navigator.onLine) return alert("A restauração de backup requer conexão com a internet.");
                     if (Array.isArray(data)) {
                         if (confirm(`Deseja substituir os dados atuais por ${data.length} registros do backup?`)) {
                             if (firebaseApi) {

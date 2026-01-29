@@ -1,4 +1,4 @@
-const CACHE_NAME = 'contabil-app-v4';
+const CACHE_NAME = 'contabil-app-v5';
 const ASSETS = [
   './index.html',
   './manifest.json'
