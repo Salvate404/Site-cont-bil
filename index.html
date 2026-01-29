@@ -121,6 +121,11 @@
                 
                 <input type="password" id="auth-password" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 focus:border-indigo-500 outline-none text-slate-800 font-bold text-center text-lg tracking-widest" placeholder="SENHA" required>
                 
+                <label class="flex items-center justify-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="auth-remember" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300">
+                    <span class="text-sm text-slate-500 font-medium">Lembrar meus dados</span>
+                </label>
+
                 <button type="submit" id="auth-btn-submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-indigo-200">Entrar</button>
             </form>
 
@@ -170,6 +175,10 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                         Modo Escuro
                     </button>
+                    <button onclick="requestNotificationPermission()" id="notify-btn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-amber-400 hover:bg-amber-900/30 transition-colors mt-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        Ativar Notificações
+                    </button>
                     <button id="install-btn" onclick="installApp()" class="hidden w-full flex items-center gap-3 px-4 py-3 rounded-lg text-teal-400 hover:bg-teal-900/30 transition-colors mt-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         Instalar App
@@ -188,10 +197,10 @@
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col h-screen overflow-hidden pb-20 md:pb-0 relative">
-            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 md:px-6 md:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sticky top-0 z-10 transition-colors shadow-sm">
+            <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-3 md:px-6 md:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sticky top-0 z-10 transition-colors shadow-sm">
                 <div>
                     <h2 class="text-lg md:text-xl font-semibold text-slate-800 dark:text-white" id="header-title">Dashboard</h2>
-                    <p class="text-sm text-slate-500">Gestão contábil simples e organizada</p>
+                    <p class="text-xs md:text-sm text-slate-500 hidden md:block">Gestão contábil simples e organizada</p>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
@@ -264,6 +273,10 @@
                 <button onclick="toggleTheme(); toggleModal('mobile-menu-modal', false)" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-yellow-50 dark:hover:bg-yellow-900/30 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                     Tema
+                </button>
+                <button onclick="requestNotificationPermission(); toggleModal('mobile-menu-modal', false)" class="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    Notificações
                 </button>
             </div>
             <button onclick="logout()" class="w-full mt-6 py-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl font-bold text-rose-600 flex items-center justify-center gap-2">
@@ -522,6 +535,7 @@
                     }
                     expenses = [];
                 }
+                checkNotifications();
                 renderView();
             });
         };
@@ -533,6 +547,7 @@
 
         function initAuth() {
             const storedUser = localStorage.getItem('app_user');
+            const savedCreds = localStorage.getItem('app_saved_creds');
             
             // Limpeza de segurança para evitar conflito com versão antiga
             sessionStorage.removeItem('app_session');
@@ -543,6 +558,14 @@
                 document.getElementById('app-container').classList.remove('hidden');
                 loadApp();
                 if (firebaseApi) startDataSync();
+            } else if (savedCreds) {
+                // Pre-fill form if credentials are saved
+                try {
+                    const { user, pass } = JSON.parse(savedCreds);
+                    document.getElementById('auth-nickname').value = user;
+                    document.getElementById('auth-password').value = pass;
+                    document.getElementById('auth-remember').checked = true;
+                } catch(e) {}
             }
         }
 
@@ -569,6 +592,7 @@
 
             const nickname = document.getElementById('auth-nickname').value.trim();
             const password = document.getElementById('auth-password').value;
+            const remember = document.getElementById('auth-remember').checked;
             const { db, ref, get, child, set } = firebaseApi;
 
             if (nickname.length < 3) return alert("O apelido deve ter pelo menos 3 letras.");
@@ -591,6 +615,11 @@
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     if (userData.password === password) {
+                        if (remember) {
+                            localStorage.setItem('app_saved_creds', JSON.stringify({ user: nickname, pass: password }));
+                        } else {
+                            localStorage.removeItem('app_saved_creds');
+                        }
                         loginSuccess(nickname);
                     } else {
                         alert("Senha incorreta.");
@@ -618,9 +647,10 @@
 
         // --- INICIALIZAÇÃO ---
         window.onload = () => {
+            initTheme(); // Ensure theme loads first
             initAuth();
-            initTheme();
             registerSW();
+            setInterval(checkNotifications, 3 * 60 * 60 * 1000); // Verifica a cada 3 horas
         };
 
         function loadApp() {
@@ -708,6 +738,72 @@
                 }
                 
                 btn.innerHTML = `${icon} ${label}`;
+            }
+        }
+
+        // --- NOTIFICAÇÕES ---
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("Este navegador não suporta notificações.");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    alert("Notificações ativadas! Você será avisado sobre contas vencidas ao abrir o app.");
+                    checkNotifications();
+                }
+            });
+        }
+
+        function checkNotifications() {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Calcular amanhã
+            const tmr = new Date();
+            tmr.setDate(tmr.getDate() + 1);
+            const tomorrow = tmr.toISOString().split('T')[0];
+
+            const overdue = expenses.filter(e => e.status !== 'paid' && e.date < today);
+            const dueToday = expenses.filter(e => e.status !== 'paid' && e.date === today);
+            const dueTomorrow = expenses.filter(e => e.status !== 'paid' && e.date === tomorrow);
+            
+            // Encontrar próximo vencimento futuro
+            const future = expenses.filter(e => e.status !== 'paid' && e.date > tomorrow).sort((a,b) => a.date.localeCompare(b.date));
+            const nextDue = future.length > 0 ? future[0].date : null;
+            
+            const nickname = currentUser ? currentUser.split(' ')[0] : 'Usuário';
+            let title = "ContábilApp";
+            let body = "";
+
+            if (overdue.length > 0) {
+                title = "Contas Atrasadas!";
+                body = `Olá ${nickname}! Você tem ${overdue.length} conta(s) atrasada(s). Verifique agora!`;
+            } else if (dueToday.length > 0) {
+                title = "Faturas de Hoje!";
+                body = `Olá ${nickname}! Você tem ${dueToday.length} faturas pra hoje.`;
+            } else if (dueTomorrow.length > 0) {
+                title = "Faturas de Amanhã";
+                body = `Olá ${nickname}! Você tem ${dueTomorrow.length} faturas para amanhã.`;
+            } else if (nextDue) {
+                const dateStr = nextDue.split('-').reverse().join('/');
+                title = "Tudo tranquilo!";
+                body = `Incrivel! Está tudo bem por aqui até o dia ${dateStr}.`;
+            } else {
+                return;
+            }
+
+            new Notification(title, {
+                body: body,
+                icon: 'https://cdn-icons-png.flaticon.com/512/2344/2344147.png'
+            });
+
+            // Atualiza texto do botão
+            const btn = document.getElementById('notify-btn');
+            if(btn) {
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Notificações Ativas`;
+                btn.classList.replace('text-amber-400', 'text-emerald-400');
             }
         }
 
@@ -970,7 +1066,7 @@
         function renderForm(container) {
             uploadedImages = [];
             container.innerHTML = `
-                <div class="max-w-6xl mx-auto bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-5 md:p-12 animate-slideUp mb-20 md:mb-0">
+                <div class="max-w-6xl mx-auto bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-5 md:p-12 animate-slideUp mb-24 md:mb-0">
                     <h2 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white mb-6 md:mb-10">Novo Lançamento</h2>
                     <form onsubmit="saveExpense(event)" class="space-y-8">
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -985,7 +1081,7 @@
                                     <input type="text" id="form-amount" oninput="formatCurrency(this)" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium text-lg" placeholder="0,00">
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Data</label>
+                                    <label id="label-date" class="text-sm font-bold text-slate-400 uppercase tracking-wider">Data Inicial</label>
                                     <input type="date" id="form-date" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium text-lg">
                                 </div>
                                 <div class="space-y-2 relative">
@@ -1020,13 +1116,18 @@
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Recorrência</label>
-                                    <select id="form-recurrence" onchange="handleRecurrenceChange()" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium bg-white text-lg">
-                                        <option value="unica">Única</option>
-                                        <option value="mensal">Mensal</option>
-                                        <option value="bimestral">Bimestral</option>
-                                        <option value="trimestral">Trimestral</option>
-                                        <option value="semestral">Semestral</option>
-                                    </select>
+                                    <div class="relative">
+                                        <select id="form-recurrence" onchange="handleRecurrenceChange()" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium bg-white text-lg appearance-none cursor-pointer">
+                                            <option value="unica">Única</option>
+                                            <option value="mensal">Mensal</option>
+                                            <option value="bimestral">Bimestral</option>
+                                            <option value="trimestral">Trimestral</option>
+                                            <option value="semestral">Semestral</option>
+                                        </select>
+                                        <div class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="space-y-2 hidden" id="div-due-day">
                                     <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Dia de Vencimento</label>
@@ -1034,14 +1135,19 @@
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Forma de Pagamento</label>
-                                    <select id="form-payment" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium bg-white text-lg">
-                                        <option value="boleto">📄 Boleto</option>
-                                        <option value="pix">💠 Pix</option>
-                                        <option value="cartao">💳 Cartão de Crédito</option>
-                                        <option value="debito">💳 Débito</option>
-                                        <option value="dinheiro">💵 Dinheiro</option>
-                                        <option value="automatico">🔄 Débito Automático</option>
-                                    </select>
+                                    <div class="relative">
+                                        <select id="form-payment" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium bg-white text-lg appearance-none cursor-pointer">
+                                            <option value="boleto">📄 Boleto</option>
+                                            <option value="pix">💠 Pix</option>
+                                            <option value="cartao">💳 Cartão de Crédito</option>
+                                            <option value="debito">💳 Débito</option>
+                                            <option value="dinheiro">💵 Dinheiro</option>
+                                            <option value="automatico">🔄 Débito Automático</option>
+                                        </select>
+                                        <div class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="space-y-2 hidden" id="div-installments">
                                     <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Opções de Parcelamento</label>
@@ -1062,7 +1168,7 @@
                             <div class="space-y-8">
                                 <div class="space-y-2">
                                     <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Anotações</label>
-                                    <textarea id="form-notes" rows="5" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium resize-none text-lg" placeholder="Opcional..."></textarea>
+                                    <textarea id="form-notes" required rows="5" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium resize-none text-lg" placeholder="Detalhes..."></textarea>
                                 </div>
                                 
                                 <div class="flex items-center gap-4 p-5 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-100 dark:border-slate-600">
@@ -1079,7 +1185,6 @@
                     </form>
                 </div>
             `;
-            document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
         }
 
         function renderList(container) {
