@@ -12,9 +12,93 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script>
-        tailwind.config = { darkMode: 'class' }
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            50: 'rgb(var(--c-slate-50) / <alpha-value>)',
+                            100: 'rgb(var(--c-slate-100) / <alpha-value>)',
+                            200: 'rgb(var(--c-slate-200) / <alpha-value>)',
+                            300: 'rgb(var(--c-slate-300) / <alpha-value>)',
+                            400: 'rgb(var(--c-slate-400) / <alpha-value>)',
+                            500: 'rgb(var(--c-slate-500) / <alpha-value>)',
+                            600: 'rgb(var(--c-slate-600) / <alpha-value>)',
+                            700: 'rgb(var(--c-slate-700) / <alpha-value>)',
+                            800: 'rgb(var(--c-slate-800) / <alpha-value>)',
+                            900: 'rgb(var(--c-slate-900) / <alpha-value>)',
+                        },
+                        indigo: {
+                            50: 'rgb(var(--c-indigo-50) / <alpha-value>)',
+                            100: 'rgb(var(--c-indigo-100) / <alpha-value>)',
+                            200: 'rgb(var(--c-indigo-200) / <alpha-value>)',
+                            300: 'rgb(var(--c-indigo-300) / <alpha-value>)',
+                            400: 'rgb(var(--c-indigo-400) / <alpha-value>)',
+                            500: 'rgb(var(--c-indigo-500) / <alpha-value>)',
+                            600: 'rgb(var(--c-indigo-600) / <alpha-value>)',
+                            700: 'rgb(var(--c-indigo-700) / <alpha-value>)',
+                            800: 'rgb(var(--c-indigo-800) / <alpha-value>)',
+                            900: 'rgb(var(--c-indigo-900) / <alpha-value>)',
+                        }
+                    }
+                }
+            }
+        }
     </script>
     <style>
+        :root {
+            /* Default Light Mode (Standard Tailwind Colors) */
+            --c-slate-50: 248 250 252; --c-slate-100: 241 245 249; --c-slate-200: 226 232 240;
+            --c-slate-300: 203 213 225; --c-slate-400: 148 163 184; --c-slate-500: 100 116 139;
+            --c-slate-600: 71 85 105; --c-slate-700: 51 65 85; --c-slate-800: 30 41 59; --c-slate-900: 15 23 42;
+            
+            --c-indigo-50: 238 242 255; --c-indigo-100: 224 231 255; --c-indigo-200: 199 210 254;
+            --c-indigo-300: 165 180 252; --c-indigo-400: 129 140 248; --c-indigo-500: 99 102 241;
+            --c-indigo-600: 79 70 229; --c-indigo-700: 67 56 202; --c-indigo-800: 55 48 163; --c-indigo-900: 49 46 129;
+        }
+
+        /* Salvati Theme (Wine BG, Navy Accents) */
+        .theme-salvati {
+            /* Backgrounds (Slate) -> Wine Tones */
+            --c-slate-900: 76 5 25;   /* Rose 950 (Main BG) */
+            --c-slate-800: 136 19 55; /* Rose 900 (Card BG) */
+            --c-slate-700: 159 18 57; /* Rose 800 (Borders/Inputs) */
+            --c-slate-600: 190 18 60; /* Rose 700 */
+            
+            /* Accents (Indigo) -> Navy Blue Tones */
+            --c-indigo-50: 239 246 255;
+            --c-indigo-100: 219 234 254;
+            --c-indigo-400: 96 165 250;
+            --c-indigo-500: 59 130 246;
+            --c-indigo-600: 30 58 138;  /* Blue 800 (Primary) */
+            --c-indigo-700: 23 37 84;   /* Blue 950 (Hover) */
+        }
+
+        .theme-salvati body {
+            background-image: url('https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-blend-mode: multiply;
+        }
+
+        /* Marinho Theme (Navy BG, Wine Accents) */
+        .theme-marinho {
+            /* Backgrounds (Slate) -> Navy Tones (Standard Dark is already Navy, ensuring consistency) */
+            --c-slate-900: 15 23 42;
+            --c-slate-800: 30 41 59;
+            --c-slate-700: 51 65 85;
+
+            /* Accents (Indigo) -> Wine Red Tones */
+            --c-indigo-50: 255 241 242;
+            --c-indigo-100: 255 228 230;
+            --c-indigo-400: 251 113 133;
+            --c-indigo-500: 244 63 94;
+            --c-indigo-600: 190 18 60;  /* Rose 700 (Primary) */
+            --c-indigo-700: 159 18 57;  /* Rose 800 (Hover) */
+        }
+
         body { font-family: 'Inter', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -104,7 +188,7 @@
 
                 <div class="flex flex-col sm:flex-row gap-3">
                     <div class="relative">
-                        <input type="text" id="search-input" placeholder="Buscar..." oninput="applyFilters()" class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 dark:text-white border-none rounded-lg focus:ring-2 focus:ring-indigo-500 w-full sm:w-64">
+                        <input type="text" id="search-input" placeholder="Buscar..." oninput="handleSearch()" class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700 dark:text-white border-none rounded-lg focus:ring-2 focus:ring-indigo-500 w-full sm:w-64">
                         <svg class="absolute left-3 top-2.5 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     </div>
                     <select id="category-filter" onchange="applyFilters()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 dark:text-white border-none rounded-lg focus:ring-2 focus:ring-indigo-500 text-slate-700">
@@ -128,7 +212,7 @@
     </div>
 
     <!-- Modal Exportar XML -->
-    <div id="export-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="export-modal" class="hidden fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-slideUp">
             <h3 class="text-xl font-bold text-slate-800 mb-2">Exportar Dados</h3>
             <p class="text-slate-500 text-sm mb-6">Selecione o formato e o período.</p>
@@ -163,7 +247,7 @@
     </div>
 
     <!-- Modal Enviar Email -->
-    <div id="email-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="email-modal" class="hidden fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-slideUp">
             <h3 class="text-xl font-bold text-slate-800 mb-2">Enviar para Contador</h3>
             <p class="text-slate-500 text-sm mb-6">Gera o XML e abre seu cliente de e-mail.</p>
@@ -195,7 +279,7 @@
     </div>
 
     <!-- Modal Backup -->
-    <div id="backup-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) toggleModal('backup-modal', false)">
+    <div id="backup-modal" class="hidden fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4" onclick="if(event.target === this) toggleModal('backup-modal', false)">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-slideUp">
             <h3 class="text-xl font-bold text-slate-800 mb-2">Backup e Restauração</h3>
             <p class="text-slate-500 text-sm mb-6">Salve seus dados ou restaure de um arquivo JSON.</p>
@@ -221,8 +305,42 @@
         </div>
     </div>
 
+    <!-- Modal Pagamento -->
+    <div id="payment-modal" class="hidden fixed inset-0 bg-slate-900/80 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md p-6 animate-slideUp">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl">💸</div>
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white">Confirmar Pagamento</h3>
+                    <p class="text-sm text-slate-500" id="pay-modal-title">Conta...</p>
+                </div>
+            </div>
+            
+            <form onsubmit="confirmPayment(event)" class="space-y-4">
+                <input type="hidden" id="pay-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Valor Pago (R$)</label>
+                    <input type="text" id="pay-amount" oninput="formatCurrency(this)" class="w-full px-4 py-3 rounded-xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white font-bold text-lg text-slate-700 focus:border-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Anotações (Opcional)</label>
+                    <textarea id="pay-notes" rows="2" class="w-full px-4 py-3 rounded-xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white text-sm focus:border-emerald-500 outline-none resize-none" placeholder="Ex: Pago via Pix..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Anexar Comprovante (Img/PDF)</label>
+                    <input type="file" id="pay-file" accept="image/*,application/pdf" multiple class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-all">
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-200 dark:shadow-none">Confirmar Pagamento</button>
+                    <button type="button" onclick="toggleModal('payment-modal', false)" class="px-6 py-3 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-400 font-bold">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal Detalhes -->
-    <div id="details-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) toggleModal('details-modal', false)">
+    <div id="details-modal" class="hidden fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4" onclick="if(event.target === this) toggleModal('details-modal', false)">
         <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-2xl p-6 md:p-8 animate-slideUp relative overflow-y-auto max-h-[90vh] no-scrollbar">
             <button onclick="toggleModal('details-modal', false)" class="absolute top-6 right-6 p-2 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -234,7 +352,7 @@
     </div>
 
     <!-- Modal Galeria Imagens -->
-    <div id="gallery-modal" class="hidden fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[100] flex items-center justify-center p-4" onclick="toggleModal('gallery-modal', false)">
+    <div id="gallery-modal" class="hidden fixed inset-0 bg-slate-900/95 z-[100] flex items-center justify-center p-4" onclick="toggleModal('gallery-modal', false)">
         <div class="relative max-w-4xl w-full flex flex-col items-center" onclick="event.stopPropagation()">
             <div class="absolute -top-12 right-0 flex gap-4">
                 <button onclick="downloadCurrentImage()" class="text-white hover:text-indigo-400 transition-colors" title="Baixar Imagem">
@@ -244,10 +362,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 </button>
             </div>
-            <div class="bg-white p-2 rounded-3xl shadow-2xl overflow-hidden mb-6">
+            <div class="bg-white p-2 rounded-3xl shadow-2xl overflow-hidden mb-6 flex items-center justify-center bg-slate-900">
                 <img id="gallery-img" src="" alt="Comprovante Full" class="max-h-[70vh] w-auto object-contain rounded-2xl">
             </div>
-            <div id="gallery-thumbs" class="flex gap-3 px-4 py-2 bg-white/10 rounded-2xl backdrop-blur-xl"></div>
+            <div id="gallery-thumbs" class="flex gap-3 px-4 py-2 bg-slate-800/90 rounded-2xl"></div>
         </div>
     </div>
 
@@ -257,8 +375,12 @@
         let currentView = 'dashboard';
         let uploadedImages = [];
         let dashboardDate = new Date().toISOString().slice(0, 7);
+        let dashboardMode = 'monthly'; // 'monthly' | 'custom'
+        let dashboardCustomStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+        let dashboardCustomEnd = new Date().toISOString().split('T')[0];
         let dashboardCharts = {};
         let deferredPrompt;
+        let searchTimeout;
 
         const suggestedCategories = ['Habitação', 'Alimentação', 'Transporte', 'Contas Fixas', 'Lazer', 'Saúde', 'Educação', 'Outros'];
 
@@ -355,28 +477,50 @@
         }
 
         // --- TEMA ---
+        const themes = ['light', 'salvati', 'marinho'];
+
         function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            updateThemeBtn();
+            const current = localStorage.getItem('theme') || 'light';
+            const nextIndex = (themes.indexOf(current) + 1) % themes.length;
+            const nextTheme = themes[nextIndex];
+            setTheme(nextTheme);
+        }
+
+        function setTheme(theme) {
+            const root = document.documentElement;
+            root.classList.remove('dark', 'theme-salvati', 'theme-marinho');
+            
+            if (theme !== 'light') {
+                root.classList.add('dark'); // All non-light themes use dark layout
+                if (theme === 'salvati') root.classList.add('theme-salvati');
+                if (theme === 'marinho') root.classList.add('theme-marinho');
+            }
+            
+            localStorage.setItem('theme', theme);
+            updateThemeBtn(theme);
         }
 
         function initTheme() {
-            const theme = localStorage.getItem('theme');
-            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
-            updateThemeBtn();
+            const saved = localStorage.getItem('theme');
+            const theme = saved || 'light';
+            setTheme(theme);
         }
 
-        function updateThemeBtn() {
-            const isDark = document.documentElement.classList.contains('dark');
+        function updateThemeBtn(theme) {
             const btn = document.getElementById('theme-btn');
             if(btn) {
-                btn.innerHTML = isDark ? 
-                    `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Modo Claro` : 
-                    `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> Modo Escuro`;
+                let label = 'Modo Claro';
+                let icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+                
+                if (theme === 'salvati') {
+                    label = 'Modo Salvati';
+                    icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>`;
+                } else if (theme === 'marinho') {
+                    label = 'Modo Marinho';
+                    icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>`;
+                }
+                
+                btn.innerHTML = `${icon} ${label}`;
             }
         }
 
@@ -426,19 +570,42 @@
         }
 
         function renderDashboard(container) {
-            // Filtro de Data
+            // Setup Month Options (always needed for dropdown)
             const allMonths = [...new Set(expenses.map(e => e.date.slice(0, 7)))].sort().reverse();
             const currentRealMonth = new Date().toISOString().slice(0, 7);
             const monthOptions = [...new Set([...allMonths, currentRealMonth])].sort().reverse();
             
             if (!monthOptions.includes(dashboardDate)) dashboardDate = monthOptions[0];
 
-            const currentData = expenses.filter(e => e.date.startsWith(dashboardDate));
+            // Determine Data based on Mode
+            let currentData, prevData;
             
-            // Dados Mês Anterior (Comparação)
-            const [y, m] = dashboardDate.split('-');
-            const prevDate = new Date(y, m - 2, 1).toISOString().slice(0, 7);
-            const prevData = expenses.filter(e => e.date.startsWith(prevDate));
+            if (dashboardMode === 'monthly') {
+                currentData = expenses.filter(e => e.date.startsWith(dashboardDate));
+                
+                const [y, m] = dashboardDate.split('-');
+                const prevDate = new Date(y, m - 2, 1).toISOString().slice(0, 7);
+                prevData = expenses.filter(e => e.date.startsWith(prevDate));
+            } else {
+                // Custom Mode
+                currentData = expenses.filter(e => e.date >= dashboardCustomStart && e.date <= dashboardCustomEnd);
+                
+                // Compare with previous period of same length
+                const start = new Date(dashboardCustomStart);
+                const end = new Date(dashboardCustomEnd);
+                const diffTime = Math.abs(end - start);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+                
+                const prevEnd = new Date(start);
+                prevEnd.setDate(prevEnd.getDate() - 1);
+                const prevStart = new Date(prevEnd);
+                prevStart.setDate(prevStart.getDate() - diffDays + 1);
+                
+                const pStartStr = prevStart.toISOString().split('T')[0];
+                const pEndStr = prevEnd.toISOString().split('T')[0];
+                
+                prevData = expenses.filter(e => e.date >= pStartStr && e.date <= pEndStr);
+            }
 
             // Métricas
             const total = currentData.reduce((acc, cur) => acc + parseFloat(cur.amount), 0);
@@ -466,17 +633,34 @@
             container.innerHTML = `
                 <div class="space-y-6 animate-slideUp">
                     <!-- Header & Filter -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                         <h3 class="text-lg font-bold text-slate-800 dark:text-white">Visão Geral</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-slate-500 font-medium">Período:</span>
-                            <select onchange="updateDashboardDate(this.value)" class="bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-white border border-slate-200 text-slate-700 text-sm font-bold rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 shadow-sm outline-none cursor-pointer">
-                                ${monthOptions.map(opt => {
-                                    const [yr, mo] = opt.split('-');
-                                    const label = new Date(yr, mo-1, 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-                                    return `<option value="${opt}" ${opt === dashboardDate ? 'selected' : ''}>${label.charAt(0).toUpperCase() + label.slice(1)}</option>`;
-                                }).join('')}
-                            </select>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3 bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <!-- Mode Toggles -->
+                            <div class="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1 self-start sm:self-center">
+                                <button onclick="setDashboardMode('monthly')" class="${dashboardMode === 'monthly' ? 'bg-white dark:bg-slate-600 shadow-sm text-indigo-600 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'} px-3 py-1.5 rounded-md text-xs font-bold transition-all">Mensal</button>
+                                <button onclick="setDashboardMode('custom')" class="${dashboardMode === 'custom' ? 'bg-white dark:bg-slate-600 shadow-sm text-indigo-600 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'} px-3 py-1.5 rounded-md text-xs font-bold transition-all">Personalizado</button>
+                            </div>
+
+                            <!-- Controls -->
+                            <div class="flex items-center gap-2">
+                                ${dashboardMode === 'monthly' ? `
+                                    <select onchange="updateDashboardDate(this.value)" class="bg-transparent dark:text-white text-slate-700 text-sm font-bold focus:ring-0 border-none outline-none cursor-pointer py-1 pl-2 pr-8">
+                                        ${monthOptions.map(opt => {
+                                            const [yr, mo] = opt.split('-');
+                                            const label = new Date(yr, mo-1, 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+                                            return `<option value="${opt}" ${opt === dashboardDate ? 'selected' : ''}>${label.charAt(0).toUpperCase() + label.slice(1)}</option>`;
+                                        }).join('')}
+                                    </select>
+                                ` : `
+                                    <div class="flex items-center gap-2 px-2">
+                                        <input type="date" value="${dashboardCustomStart}" onchange="updateCustomDates('start', this.value)" class="bg-slate-50 dark:bg-slate-600 border-none rounded-lg text-xs font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 py-1.5 px-2">
+                                        <span class="text-slate-400 font-bold">-</span>
+                                        <input type="date" value="${dashboardCustomEnd}" onchange="updateCustomDates('end', this.value)" class="bg-slate-50 dark:bg-slate-600 border-none rounded-lg text-xs font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 py-1.5 px-2">
+                                    </div>
+                                `}
+                            </div>
                         </div>
                     </div>
 
@@ -490,7 +674,7 @@
                                 ${getBadge(totalDiff)}
                             </div>
                             <div>
-                                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Total Mensal</p>
+                                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Total ${dashboardMode === 'monthly' ? 'Mensal' : 'Período'}</p>
                                 <p class="text-2xl font-bold text-slate-800 dark:text-white">R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                             </div>
                         </div>
@@ -559,7 +743,7 @@
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                                Últimos Registros do Mês
+                                Últimos Registros ${dashboardMode === 'monthly' ? 'do Mês' : 'do Período'}
                             </h3>
                             <button onclick="switchView('list')" class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors">Ver Todos</button>
                         </div>
@@ -577,7 +761,7 @@
                                         <p class="text-sm font-bold text-indigo-600">R$ ${parseFloat(e.amount).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                                     </div>
                                 </div>
-                            `).join('') : '<p class="col-span-full text-slate-400 text-sm text-center py-4">Nenhum registro neste mês.</p>'}
+                            `).join('') : '<p class="col-span-full text-slate-400 text-sm text-center py-4">Nenhum registro neste período.</p>'}
                         </div>
                     </div>
                 </div>
@@ -588,65 +772,111 @@
         function renderForm(container) {
             uploadedImages = [];
             container.innerHTML = `
-                <div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-6 md:p-10 animate-slideUp">
-                    <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-8">Novo Lançamento</h2>
+                <div class="max-w-6xl mx-auto bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8 md:p-12 animate-slideUp">
+                    <h2 class="text-3xl font-bold text-slate-800 dark:text-white mb-10">Novo Lançamento</h2>
                     <form onsubmit="saveExpense(event)" class="space-y-8">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Descrição</label>
-                                <input type="text" id="form-title" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium" placeholder="Ex: Aluguel">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Valor (R$)</label>
-                                <input type="text" id="form-amount" oninput="formatCurrency(this)" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium" placeholder="0,00">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Data</label>
-                                <input type="date" id="form-date" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Categoria</label>
-                                <input type="text" id="form-category" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium" placeholder="Digite ou selecione...">
-                                <div class="flex flex-wrap gap-2 mt-2">
-                                    ${suggestedCategories.map(c => `
-                                        <button type="button" onclick="document.getElementById('form-category').value = '${c}'" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-bold rounded-lg transition-colors">
-                                            ${c}
-                                        </button>
-                                    `).join('')}
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                            <!-- Coluna Principal (Inputs) -->
+                            <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Descrição</label>
+                                    <input type="text" id="form-title" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium text-lg" placeholder="Ex: Aluguel">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Valor (R$)</label>
+                                    <input type="text" id="form-amount" oninput="formatCurrency(this)" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium text-lg" placeholder="0,00">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Data</label>
+                                    <input type="date" id="form-date" required class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium text-lg">
+                                </div>
+                                <div class="space-y-2 relative">
+                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Categoria</label>
+                                    <div class="relative">
+                                        <input type="text" id="form-category" readonly 
+                                            onclick="toggleCategoryList()"
+                                            oninput="this.value = this.value.toUpperCase()"
+                                            required 
+                                            class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-bold uppercase cursor-pointer placeholder-slate-400 text-lg" 
+                                            placeholder="SELECIONE A CATEGORIA">
+                                        <div onclick="toggleCategoryList()" class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer hover:text-indigo-500 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Dropdown Customizado -->
+                                    <div id="category-dropdown" class="hidden absolute z-20 w-full mt-2 bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-slate-700 animate-slideUp">
+                                        <div class="max-h-60 overflow-y-auto no-scrollbar">
+                                            ${suggestedCategories.filter(c => c !== 'Outros').map(c => `
+                                                <div onclick="selectCategory('${c.toUpperCase()}')" class="px-5 py-4 text-white font-bold text-base hover:bg-indigo-600 cursor-pointer transition-colors border-b border-slate-800 last:border-0 flex items-center gap-3">
+                                                    <span>${getIcon(c)}</span>
+                                                    ${c.toUpperCase()}
+                                                </div>
+                                            `).join('')}
+                                            <div onclick="enableCustomCategory()" class="px-5 py-4 text-indigo-400 font-bold text-base hover:bg-slate-800 cursor-pointer transition-colors flex items-center gap-3 border-t border-slate-700">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                                                OUTRO...
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Recorrência</label>
+                                    <select id="form-recurrence" onchange="handleRecurrenceChange()" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium bg-white text-lg">
+                                        <option value="unica">Única</option>
+                                        <option value="mensal">Mensal</option>
+                                        <option value="bimestral">Bimestral</option>
+                                        <option value="trimestral">Trimestral</option>
+                                        <option value="semestral">Semestral</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2 hidden" id="div-due-day">
+                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Dia de Vencimento</label>
+                                    <input type="number" id="form-due-day" min="1" max="31" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium text-lg" placeholder="Dia (1-31)">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Forma de Pagamento</label>
+                                    <select id="form-payment" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium bg-white text-lg">
+                                        <option value="boleto">📄 Boleto</option>
+                                        <option value="pix">💠 Pix</option>
+                                        <option value="cartao">💳 Cartão de Crédito</option>
+                                        <option value="debito">💳 Débito</option>
+                                        <option value="dinheiro">💵 Dinheiro</option>
+                                        <option value="automatico">🔄 Débito Automático</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2 hidden" id="div-installments">
+                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Opções de Parcelamento</label>
+                                    <div class="flex gap-4">
+                                        <select id="form-installments-type" onchange="toggleInstallmentType()" class="w-1/2 px-4 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-bold text-sm bg-white">
+                                            <option value="fixed">Parcelado (x Vezes)</option>
+                                            <option value="subscription">Mensalidade (Fixo)</option>
+                                        </select>
+                                        <div class="relative w-1/2" id="div-installments-input">
+                                            <input type="number" id="form-installments" min="1" value="1" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium text-lg" placeholder="1">
+                                            <span class="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400 pointer-events-none">x</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Recorrência</label>
-                                <select id="form-recurrence" onchange="toggleDueDay()" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium bg-white">
-                                    <option value="unica">Única</option>
-                                    <option value="mensal">Mensal</option>
-                                    <option value="bimestral">Bimestral</option>
-                                    <option value="trimestral">Trimestral</option>
-                                    <option value="semestral">Semestral</option>
-                                </select>
-                            </div>
-                            <div class="space-y-2 hidden" id="div-due-day">
-                                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Dia de Vencimento</label>
-                                <input type="number" id="form-due-day" min="1" max="31" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium" placeholder="Dia (1-31)">
+
+                            <!-- Coluna Lateral (Notas e Status) -->
+                            <div class="space-y-8">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-bold text-slate-400 uppercase tracking-wider">Anotações</label>
+                                    <textarea id="form-notes" rows="5" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium resize-none text-lg" placeholder="Opcional..."></textarea>
+                                </div>
+                                
+                                <div class="flex items-center gap-4 p-5 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-100 dark:border-slate-600">
+                                    <input type="checkbox" id="form-paid" class="w-6 h-6 text-indigo-600 rounded-md focus:ring-indigo-500 border-gray-300 cursor-pointer">
+                                    <label for="form-paid" class="font-bold text-slate-600 dark:text-slate-300 cursor-pointer select-none">Este lançamento já foi pago?</label>
+                                </div>
                             </div>
                         </div>
-                        <div class="space-y-4">
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Anexar Imagens</label>
-                            <div id="image-preview-container" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                                <button type="button" onclick="document.getElementById('file-input').click()" class="aspect-square rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center text-slate-400 hover:border-indigo-500 hover:text-indigo-500 transition-all bg-slate-50 dark:bg-slate-700/50">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                                    <span class="text-[10px] font-bold mt-1 uppercase">Adicionar</span>
-                                </button>
-                            </div>
-                            <input type="file" id="file-input" multiple accept="image/*" class="hidden" onchange="handleFiles(this.files)">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Anotações</label>
-                            <textarea id="form-notes" rows="3" class="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 outline-none text-slate-800 font-medium resize-none" placeholder="Opcional..."></textarea>
-                        </div>
-                        <div class="flex gap-4 pt-4">
-                            <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-5 rounded-2xl shadow-xl transition-all">Salvar Mensalidade</button>
-                            <button type="button" onclick="switchView('dashboard')" class="px-8 py-5 rounded-2xl border-2 border-slate-100 dark:border-slate-600 font-bold text-slate-500 dark:text-slate-400">Cancelar</button>
+
+                        <div class="flex gap-4 pt-6">
+                            <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-5 rounded-2xl shadow-xl transition-all text-lg">Salvar Mensalidade</button>
+                            <button type="button" onclick="switchView('dashboard')" class="px-8 py-5 rounded-2xl border-2 border-slate-100 dark:border-slate-600 font-bold text-slate-500 dark:text-slate-400 text-lg">Cancelar</button>
                         </div>
                     </form>
                 </div>
@@ -657,154 +887,467 @@
         function renderList(container) {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             const categoryFilter = document.getElementById('category-filter').value;
+            const showPaid = localStorage.getItem('show_paid_items') === 'true';
+
+            // Migração de dados antigos (adiciona status se não existir)
+            expenses = expenses.map(e => ({ ...e, status: e.status || 'pending' }));
+            localStorage.setItem('finances_data', JSON.stringify(expenses));
 
             const filtered = expenses.filter(e => {
                 const matchSearch = e.title.toLowerCase().includes(searchTerm) || (e.notes || '').toLowerCase().includes(searchTerm);
                 const matchCat = categoryFilter === 'all' || e.category === categoryFilter;
-                return matchSearch && matchCat;
+                const matchStatus = showPaid ? true : e.status === 'pending';
+                return matchSearch && matchCat && matchStatus;
             });
 
-            // Agrupar por Mês/Ano
-            const groups = filtered.reduce((acc, cur) => {
-                const [y, m, d] = cur.date.split('-');
-                const label = new Date(y, m-1, d).toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-                if (!acc[label]) acc[label] = [];
-                acc[label].push(cur);
-                return acc;
-            }, {});
+            // Definição de Datas para as Seções
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const todayStr = today.toISOString().split('T')[0];
+            
+            const endOfWeek = new Date(today);
+            endOfWeek.setDate(today.getDate() + (6 - today.getDay())); // Sábado
+            const endOfWeekStr = endOfWeek.toISOString().split('T')[0];
+
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            const endOfMonthStr = endOfMonth.toISOString().split('T')[0];
+
+            // Buckets
+            const buckets = {
+                overdue: { label: '🚨 Atrasadas', items: [], color: 'text-rose-500', border: 'border-rose-200 bg-rose-50' },
+                today: { label: '📅 Faturas do Dia', items: [], color: 'text-indigo-600', border: 'border-indigo-200 bg-indigo-50' },
+                week: { label: '🗓️ Faturas da Semana', items: [], color: 'text-blue-500', border: 'border-slate-100' },
+                month: { label: '📆 Faturas do Mês', items: [], color: 'text-slate-600', border: 'border-slate-100' },
+                future: { label: '🔮 Lançamentos Futuros', items: [], color: 'text-slate-400', border: 'border-slate-100' },
+                paid: { label: '✅ Pagas / Concluídas', items: [], color: 'text-emerald-600', border: 'border-emerald-100 bg-emerald-50/50 opacity-75' }
+            };
+
+            filtered.forEach(e => {
+                if (e.status === 'paid') {
+                    buckets.paid.items.push(e);
+                } else {
+                    if (e.date < todayStr) buckets.overdue.items.push(e);
+                    else if (e.date === todayStr) buckets.today.items.push(e);
+                    else if (e.date <= endOfWeekStr) buckets.week.items.push(e);
+                    else if (e.date <= endOfMonthStr) buckets.month.items.push(e);
+                    else buckets.future.items.push(e);
+                }
+            });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="bg-white dark:bg-slate-800 p-24 rounded-3xl border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center text-center shadow-sm">
+                container.innerHTML = `
+                <div class="flex justify-end mb-4">
+                    <label class="flex items-center gap-2 cursor-pointer bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <input type="checkbox" ${showPaid ? 'checked' : ''} onchange="toggleShowPaid(this.checked)" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Mostrar Pagas</span>
+                    </label>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-24 rounded-3xl border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center text-center shadow-sm">
                     <div class="w-24 h-24 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner">📁</div>
-                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Sem resultados</h3>
-                    <p class="text-slate-500">Ajuste os filtros ou adicione uma nova mensalidade.</p>
+                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Tudo em dia!</h3>
+                    <p class="text-slate-500">Nenhuma conta pendente encontrada nos filtros.</p>
                 </div>`;
                 return;
             }
 
-            let html = '<div class="space-y-12 pb-20">';
-            const sortedMonths = Object.keys(groups).sort((a,b) => new Date(groups[b][0].date) - new Date(groups[a][0].date));
+            let html = `
+                <div class="flex justify-end mb-6 animate-slideUp">
+                    <label class="flex items-center gap-2 cursor-pointer bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
+                        <input type="checkbox" ${showPaid ? 'checked' : ''} onchange="toggleShowPaid(this.checked)" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300">
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Mostrar Pagas</span>
+                    </label>
+                </div>
+                <div class="space-y-10 pb-20">
+            `;
             
-            sortedMonths.forEach(month => {
-                // Ordenação: Prioriza Dia de Vencimento, senão usa o dia da Data do registro
-                groups[month].sort((a, b) => {
-                    const dayA = a.dueDay ? parseInt(a.dueDay) : parseInt(a.date.split('-')[2]);
-                    const dayB = b.dueDay ? parseInt(b.dueDay) : parseInt(b.date.split('-')[2]);
-                    return dayA - dayB;
-                });
+            // Renderizar cada bucket
+            Object.keys(buckets).forEach(key => {
+                const bucket = buckets[key];
+                if (bucket.items.length === 0) return;
+
+                // Ordenar por data
+                bucket.items.sort((a, b) => new Date(a.date) - new Date(b.date));
 
                 html += `
-                    <section class="space-y-6">
-                        <h3 class="text-xs font-black text-slate-300 uppercase tracking-[0.2em] px-2 flex items-center gap-4">
-                            ${month} <div class="h-px flex-1 bg-slate-100"></div>
+                    <section class="space-y-4 animate-slideUp">
+                        <h3 class="text-sm font-black ${bucket.color} uppercase tracking-widest px-2 flex items-center gap-3">
+                            ${bucket.label} <span class="bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-0.5 rounded-full text-[10px]">${bucket.items.length}</span> <div class="h-px flex-1 bg-slate-100 dark:bg-slate-700"></div>
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                            ${groups[month].map(e => {
-                                let nextDueInfo = '';
-                                if (e.recurrence && e.recurrence !== 'unica' && e.dueDay) {
-                                    const nextDate = calculateNextDue(e.date, e.recurrence, e.dueDay);
-                                    nextDueInfo = `
-                                        <div class="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase">Próximo Vencimento</span>
-                                            <span class="text-xs font-bold text-indigo-500">${nextDate}</span>
-                                        </div>
-                                    `;
-                                }
-                                return `
-                                <div onclick="openDetails('${e.id}')" class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-6 flex flex-col group hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-500/50 cursor-pointer transition-all relative overflow-hidden animate-slideUp">
-                                    <button onclick="event.stopPropagation(); deleteExpense('${e.id}')" class="absolute top-4 right-4 p-2 bg-red-50 text-red-500 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all z-10">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                    </button>
-                                    <div class="flex items-start gap-4 mb-6">
-                                        <div class="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-2xl border border-white">
-                                            ${getIcon(e.category)}
-                                        </div>
-                                        <div class="flex-1">
-                                            <h4 class="font-bold text-slate-800 dark:text-white text-lg line-clamp-1">${e.title}</h4>
-                                            <div class="flex gap-2 mt-1">
-                                                <span class="inline-block px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-black rounded uppercase">${e.category}</span>
-                                                ${e.recurrence && e.recurrence !== 'unica' ? `<span class="inline-block px-2 py-1 bg-purple-50 text-purple-600 text-[10px] font-black rounded uppercase">${e.recurrence}</span>` : ''}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-4 mb-6">
-                                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/50">
-                                            <p class="text-[10px] font-bold text-slate-400 uppercase">${e.dueDay ? 'Vencimento' : 'Data'}</p>
-                                            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">
-                                                ${e.dueDay ? `Dia ${e.dueDay}` : e.date.split('-').reverse().join('/')}
-                                            </p>
-                                        </div>
-                                        <div class="p-3 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/30">
-                                            <p class="text-[10px] font-bold text-indigo-400 uppercase">Valor</p>
-                                            <p class="text-sm font-black text-indigo-600">R$ ${parseFloat(e.amount).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
-                                        </div>
-                                    </div>
-                                    ${e.receiptImages?.length ? `
-                                        <div class="space-y-2">
-                                            <p class="text-[10px] font-bold text-slate-400 uppercase px-1">Comprovantes (${e.receiptImages.length})</p>
-                                            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                                                ${e.receiptImages.map((img, idx) => `
-                                                    <button onclick='event.stopPropagation(); openGallery(${JSON.stringify(e.receiptImages)}, ${idx})' class="w-14 h-14 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-600 flex-shrink-0 hover:border-indigo-300 transition-colors">
-                                                        <img src="${img}" class="w-full h-full object-cover">
-                                                    </button>
-                                                `).join('')}
-                                            </div>
-                                        </div>
-                                    ` : ''}
-                                    ${e.notes ? `<div class="mt-4 p-3 bg-slate-50/50 rounded-xl text-xs text-slate-500 italic">"${e.notes}"</div>` : ''}
-                                    ${nextDueInfo}
-                                </div>
-                            `}).join('')}
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            ${bucket.items.map(e => renderCard(e, bucket.border)).join('')}
                         </div>
                     </section>
                 `;
             });
+
             html += '</div>';
+            
+            // Input file oculto global para uploads rápidos
+            html += `<input type="file" id="card-file-input" accept="image/*,application/pdf" class="hidden" onchange="handleCardFile(this)">`;
+            
             container.innerHTML = html;
         }
 
+        function renderCard(e, borderClass) {
+            const isPaid = e.status === 'paid';
+            const isRecurring = e.recurrence !== 'unica';
+            return `
+                <div onclick="openDetails('${e.id}')" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border ${isPaid ? 'border-emerald-200' : 'border-slate-100 dark:border-slate-700'} p-5 flex flex-col group hover:shadow-md transition-all duration-200 relative overflow-hidden ${isPaid ? 'opacity-80 grayscale-[0.3]' : ''}">
+                    
+                    <!-- Ações Rápidas -->
+                    <div class="absolute top-4 right-4 flex gap-2 z-10">
+                        <button onclick="event.stopPropagation(); ${isPaid ? `toggleStatus('${e.id}')` : `openPaymentModal('${e.id}')`}" class="h-8 px-3 rounded-lg flex items-center gap-1.5 transition-all ${isPaid ? 'bg-emerald-500 text-white shadow-emerald-200 shadow-lg' : 'bg-white border border-slate-200 dark:bg-slate-700 dark:border-slate-600 text-slate-500 hover:border-emerald-500 hover:text-emerald-500'}" title="${isPaid ? 'Marcar como Pendente' : 'Pagar Agora'}">
+                            ${isPaid ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '<span class="text-[10px] font-bold uppercase">Pagar</span>'}
+                        </button>
+                        <button onclick="event.stopPropagation(); deleteExpense('${e.id}')" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl ${isPaid ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300'} flex items-center justify-center text-xl border border-white dark:border-slate-600 shadow-sm">
+                            ${getIcon(e.category)}
+                        </div>
+                        <div class="flex-1 pr-16">
+                            <h4 class="font-bold text-slate-800 dark:text-white text-base line-clamp-1 ${isPaid ? 'line-through text-slate-400' : ''}">${e.title}</h4>
+                            <div class="flex flex-wrap gap-2 mt-1">
+                                <span class="inline-block px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold rounded uppercase">${e.category}</span>
+                                ${e.date < new Date().toISOString().split('T')[0] && !isPaid ? '<span class="inline-block px-1.5 py-0.5 bg-rose-100 text-rose-600 text-[10px] font-bold rounded uppercase">Atrasado</span>' : ''}
+                                ${e.installmentsTotal ? `<span class="inline-block px-1.5 py-0.5 bg-indigo-100 text-indigo-600 text-[10px] font-bold rounded uppercase">Parcela ${e.installmentsPaid + 1}/${e.installmentsTotal}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-2 pt-3 border-t border-slate-50 dark:border-slate-700/50">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Vencimento</span>
+                            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">${e.date.split('-').reverse().join('/')}</span>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Valor</span>
+                            <span class="text-lg font-black ${isPaid ? 'text-emerald-600' : 'text-indigo-600'}">R$ ${parseFloat(e.amount).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>
+                        </div>
+                    </div>
+
+                    <!-- Área de Comprovantes -->
+                    <div class="mt-3 flex items-center gap-2">
+                        ${e.receiptImages && e.receiptImages.length > 0 ? `
+                            <div class="flex -space-x-2 overflow-hidden py-1 px-1">
+                                ${e.receiptImages.slice(0,3).map((img, idx) => `
+                                    <div onclick='event.stopPropagation(); openGallery("${e.id}", ${idx})' class="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 overflow-hidden cursor-pointer hover:scale-110 transition-transform z-0 hover:z-10">
+                                        ${img.startsWith('data:application/pdf') ? '<div class="w-full h-full bg-red-50 flex items-center justify-center text-[8px] text-red-500 font-bold">PDF</div>' : `<img src="${img}" class="w-full h-full object-cover">`}
+                                    </div>
+                                `).join('')}
+                                ${e.receiptImages.length > 3 ? `<div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 border-2 border-white dark:border-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-500">+${e.receiptImages.length - 3}</div>` : ''}
+                            </div>
+                        ` : `
+                            <button onclick="event.stopPropagation(); triggerCardUpload('${e.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-700/50 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-xs font-bold border border-dashed border-slate-200 dark:border-slate-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                                Anexar Comprovante
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
         // --- LÓGICA DE DADOS ---
-        function handleFiles(files) {
-            const container = document.getElementById('image-preview-container');
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const base64 = e.target.result;
-                    uploadedImages.push(base64);
-                    const div = document.createElement('div');
-                    div.className = "relative group aspect-square rounded-2xl overflow-hidden border-2 border-slate-100";
-                    div.innerHTML = `<img src="${base64}" class="w-full h-full object-cover">`;
-                    container.insertBefore(div, container.lastElementChild);
+        function openPaymentModal(id) {
+            const e = expenses.find(exp => exp.id === id);
+            if (!e) return;
+            
+            document.getElementById('pay-id').value = id;
+            document.getElementById('pay-modal-title').innerText = `${e.title} - Vencimento: ${e.date.split('-').reverse().join('/')}`;
+            
+            // Pre-fill amount
+            const amountStr = parseFloat(e.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            document.getElementById('pay-amount').value = amountStr;
+            document.getElementById('pay-notes').value = e.notes || '';
+            document.getElementById('pay-file').value = '';
+            
+            toggleModal('payment-modal', true);
+        }
+
+        async function confirmPayment(event) {
+            event.preventDefault();
+            const id = document.getElementById('pay-id').value;
+            const amountStr = document.getElementById('pay-amount').value;
+            const notes = document.getElementById('pay-notes').value;
+            const fileInput = document.getElementById('pay-file');
+            
+            const idx = expenses.findIndex(e => e.id === id);
+            if (idx > -1) {
+                // Atualizar dados
+                const expense = expenses[idx];
+                const paidAmount = parseFloat(amountStr.replace(/\./g, '').replace(',', '.'));
+                
+                // Criar registro no histórico (Sub-caixa)
+                const historyItem = {
+                    datePaid: new Date().toISOString().split('T')[0],
+                    amount: paidAmount,
+                    originalDate: expense.date,
+                    notes: notes,
+                    receiptImages: []
                 };
+                
+                // Processar novos arquivos
+                if (fileInput.files.length > 0) {
+                    for (const file of fileInput.files) {
+                        const base64 = await readFileAsBase64(file);
+                        historyItem.receiptImages.push(base64);
+                    }
+                }
+                
+                if (!expense.paymentHistory) expense.paymentHistory = [];
+                expense.paymentHistory.push(historyItem);
+
+                // Lógica de Atualização (Recorrência)
+                if (expense.recurrence === 'unica') {
+                    expense.status = 'paid';
+                    expense.amount = paidAmount;
+                    expense.notes = notes;
+                    if (historyItem.receiptImages.length) expense.receiptImages = historyItem.receiptImages;
+                } else {
+                    // Recorrente: Avança a data
+                    const currentDueDay = expense.dueDay || expense.date.split('-')[2];
+                    if (expense.installmentsTotal) {
+                        expense.installmentsPaid = (expense.installmentsPaid || 0) + 1;
+                        if (expense.installmentsPaid >= expense.installmentsTotal) expense.status = 'paid';
+                        else expense.date = calculateNextDue(expense.date, expense.recurrence, currentDueDay);
+                    } else {
+                        expense.date = calculateNextDue(expense.date, expense.recurrence, currentDueDay);
+                    }
+                }
+
+                localStorage.setItem('finances_data', JSON.stringify(expenses));
+                toggleModal('payment-modal', false);
+                
+                // Se estiver na lista, atualiza. Se estiver no dashboard, atualiza.
+                renderView();
+            }
+        }
+
+        function toggleShowPaid(checked) {
+            localStorage.setItem('show_paid_items', checked);
+            renderList(document.getElementById('content-area'));
+        }
+
+        function toggleStatus(id) {
+            const idx = expenses.findIndex(e => e.id === id);
+            if (idx > -1) {
+                // Se for recorrente, força abrir o modal para confirmar pagamento e avançar data
+                if (expenses[idx].recurrence !== 'unica' && expenses[idx].status !== 'paid') {
+                    openPaymentModal(id);
+                    return;
+                }
+                const newStatus = expenses[idx].status === 'paid' ? 'pending' : 'paid';
+                expenses[idx].status = newStatus;
+                
+                // Se marcou como pago e tem recorrência, poderia sugerir criar o próximo (feature futura)
+                
+                localStorage.setItem('finances_data', JSON.stringify(expenses));
+                renderList(document.getElementById('content-area'));
+            }
+        }
+
+        let currentUploadId = null;
+        function triggerCardUpload(id) {
+            currentUploadId = id;
+            document.getElementById('card-file-input').click();
+        }
+
+        function handleCardFile(input) {
+            if (input.files && input.files[0] && currentUploadId) {
+                const file = input.files[0];
+                processFile(file).then(base64 => {
+                    const idx = expenses.findIndex(exp => exp.id === currentUploadId);
+                    if (idx > -1) {
+                        if (!expenses[idx].receiptImages) expenses[idx].receiptImages = [];
+                        expenses[idx].receiptImages.push(base64);
+                        localStorage.setItem('finances_data', JSON.stringify(expenses));
+                        renderList(document.getElementById('content-area'));
+                    }
+                    currentUploadId = null;
+                    input.value = '';
+                });
+            }
+        }
+
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
         }
 
+        async function processFile(file) {
+            if (file.type === 'application/pdf') {
+                return await readFileAsBase64(file);
+            } else {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width; let height = img.height;
+                            const MAX_SIZE = 800;
+                            if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } }
+                            else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                            canvas.width = width; canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            resolve(canvas.toDataURL('image/jpeg', 0.7));
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        function handleFiles(files) {
+            const container = document.getElementById('image-preview-container');
+            Array.from(files).forEach(file => {
+                processFile(file).then(base64 => {
+                    uploadedImages.push(base64);
+                    const div = document.createElement('div');
+                    div.className = "relative group aspect-square rounded-2xl overflow-hidden border-2 border-slate-100";
+                    
+                    if (base64.startsWith('data:application/pdf')) {
+                        div.innerHTML = `<div class="w-full h-full bg-red-50 flex flex-col items-center justify-center text-red-500"><span class="text-2xl font-bold">PDF</span><span class="text-[10px]">Anexado</span></div>`;
+                    } else {
+                        div.innerHTML = `<img src="${base64}" class="w-full h-full object-cover">`;
+                    }
+                    container.insertBefore(div, container.lastElementChild);
+                });
+            });
+        }
+
+        // --- CATEGORY DROPDOWN LOGIC ---
+        function toggleCategoryList() {
+            const dropdown = document.getElementById('category-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function selectCategory(value) {
+            const input = document.getElementById('form-category');
+            input.value = value;
+            input.setAttribute('readonly', true);
+            document.getElementById('category-dropdown').classList.add('hidden');
+        }
+
+        function enableCustomCategory() {
+            const input = document.getElementById('form-category');
+            input.value = '';
+            input.removeAttribute('readonly');
+            input.focus();
+            input.placeholder = "DIGITE A NOVA CATEGORIA...";
+            document.getElementById('category-dropdown').classList.add('hidden');
+        }
+
+        function handleRecurrenceChange() {
+            const rec = document.getElementById('form-recurrence').value;
+            const divDue = document.getElementById('div-due-day');
+            const divInst = document.getElementById('div-installments');
+            
+            divDue.classList.toggle('hidden', rec === 'unica');
+            divInst.classList.toggle('hidden', rec === 'unica');
+            
+            if (rec === 'unica') document.getElementById('form-due-day').value = '';
+        }
+
+        function toggleInstallmentType() {
+            const type = document.getElementById('form-installments-type').value;
+            document.getElementById('div-installments-input').classList.toggle('hidden', type === 'subscription');
+        }
+
         function saveExpense(e) {
             e.preventDefault();
-            const newExp = {
+            
+            const title = document.getElementById('form-title').value;
+            const amount = parseFloat(document.getElementById('form-amount').value.replace(/\./g, '').replace(',', '.'));
+            const date = document.getElementById('form-date').value;
+            const category = document.getElementById('form-category').value.toUpperCase();
+            const recurrence = document.getElementById('form-recurrence').value;
+            const dueDay = document.getElementById('form-due-day').value;
+            const notes = document.getElementById('form-notes').value;
+            const paymentMethod = document.getElementById('form-payment').value;
+            
+            const installmentsType = document.getElementById('form-installments-type') ? document.getElementById('form-installments-type').value : 'fixed';
+            let installments = parseInt(document.getElementById('form-installments').value) || 1;
+            const isPaid = document.getElementById('form-paid').checked;
+
+            // Objeto Base (A "Caixa")
+            const newExpense = {
                 id: Date.now().toString(),
-                title: document.getElementById('form-title').value,
-                amount: parseFloat(document.getElementById('form-amount').value.replace(/\./g, '').replace(',', '.')),
-                date: document.getElementById('form-date').value,
-                category: document.getElementById('form-category').value,
-                recurrence: document.getElementById('form-recurrence').value,
-                dueDay: document.getElementById('form-due-day').value,
-                notes: document.getElementById('form-notes').value,
-                receiptImages: [...uploadedImages],
+                title, amount, date, category, recurrence, dueDay, notes,
+                paymentMethod,
+                paymentHistory: [], // A "Sub-caixa" para pagamentos realizados
+                status: 'pending',
                 createdAt: Date.now()
             };
-            expenses.unshift(newExp);
+
+            if (recurrence !== 'unica') {
+                if (installmentsType === 'fixed') {
+                    newExpense.installmentsTotal = installments;
+                    newExpense.installmentsPaid = 0;
+                    newExpense.title = title + (title.toLowerCase().includes('parcela') ? '' : ' (Parcelado)');
+                } else {
+                    newExpense.isSubscription = true;
+                    newExpense.title = title + (title.toLowerCase().includes('mensal') ? '' : ' (Mensalidade)');
+                }
+            }
+
+            // Se já foi pago na criação
+            if (isPaid) {
+                const historyItem = {
+                    datePaid: new Date().toISOString().split('T')[0],
+                    amount: amount,
+                    originalDate: date,
+                    notes: notes,
+                    receiptImages: []
+                };
+                newExpense.paymentHistory.push(historyItem);
+
+                if (recurrence === 'unica') {
+                    newExpense.status = 'paid';
+                } else {
+                    // Avançar data automaticamente
+                    if (newExpense.installmentsTotal) {
+                        newExpense.installmentsPaid = 1;
+                        if (newExpense.installmentsPaid >= newExpense.installmentsTotal) {
+                            newExpense.status = 'paid';
+                        } else {
+                            newExpense.date = calculateNextDue(date, recurrence, dueDay || date.split('-')[2]);
+                        }
+                    } else {
+                        newExpense.date = calculateNextDue(date, recurrence, dueDay || date.split('-')[2]);
+                    }
+                }
+            }
+
+            expenses.unshift(newExpense);
             localStorage.setItem('finances_data', JSON.stringify(expenses));
             switchView('list');
         }
 
         function deleteExpense(id) {
+            const exp = expenses.find(e => e.id === id);
+            if (!exp) return;
+
             if (confirm("Deseja realmente excluir este registro?")) {
                 expenses = expenses.filter(e => e.id !== id);
                 localStorage.setItem('finances_data', JSON.stringify(expenses));
                 renderView();
             }
+        }
+
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => applyFilters(), 300);
         }
 
         function applyFilters() {
@@ -813,6 +1356,17 @@
 
         function updateDashboardDate(date) {
             dashboardDate = date;
+            renderDashboard(document.getElementById('content-area'));
+        }
+
+        function setDashboardMode(mode) {
+            dashboardMode = mode;
+            renderDashboard(document.getElementById('content-area'));
+        }
+
+        function updateCustomDates(type, value) {
+            if (type === 'start') dashboardCustomStart = value;
+            else dashboardCustomEnd = value;
             renderDashboard(document.getElementById('content-area'));
         }
 
@@ -872,14 +1426,26 @@
             });
         }
 
-        function openGallery(images, index) {
+        function openGallery(id, index) {
+            const exp = expenses.find(e => e.id === id);
+            if (!exp || !exp.receiptImages) return;
+            const images = exp.receiptImages;
+            
             const img = document.getElementById('gallery-img');
             const thumbs = document.getElementById('gallery-thumbs');
-            img.src = images[index];
+            
+            if (images[index].startsWith('data:application/pdf')) {
+                // Se for PDF, abre em nova aba e fecha modal (ou mostra placeholder)
+                const pdfWindow = window.open("");
+                pdfWindow.document.write(`<iframe width='100%' height='100%' src='${images[index]}'></iframe>`);
+                return;
+            } else {
+                img.src = images[index];
+            }
             
             thumbs.innerHTML = images.map((src, i) => `
                 <button onclick='updateGallery("${src}", ${i})' class="w-16 h-16 rounded-xl border-2 transition-all overflow-hidden ${i === index ? 'border-indigo-500 scale-110' : 'border-transparent opacity-50'}">
-                    <img src="${src}" class="w-full h-full object-cover">
+                    ${src.startsWith('data:application/pdf') ? '<div class="w-full h-full bg-red-50 flex items-center justify-center text-[8px] font-bold text-red-500">PDF</div>' : `<img src="${src}" class="w-full h-full object-cover">`}
                 </button>
             `).join('');
             
@@ -887,6 +1453,11 @@
         }
 
         function updateGallery(src, idx) {
+            if (src.startsWith('data:application/pdf')) {
+                const pdfWindow = window.open("");
+                pdfWindow.document.write(`<iframe width='100%' height='100%' src='${src}'></iframe>`);
+                return;
+            }
             document.getElementById('gallery-img').src = src;
             const btns = document.getElementById('gallery-thumbs').querySelectorAll('button');
             btns.forEach((b, i) => {
@@ -1053,17 +1624,6 @@
             input.value = '';
         }
 
-        function toggleDueDay() {
-            const rec = document.getElementById('form-recurrence').value;
-            const div = document.getElementById('div-due-day');
-            if (rec === 'unica') {
-                div.classList.add('hidden');
-                document.getElementById('form-due-day').value = '';
-            } else {
-                div.classList.remove('hidden');
-            }
-        }
-
         function calculateNextDue(lastDate, recurrence, dueDay) {
             const [y, m, d] = lastDate.split('-').map(Number);
             let targetMonth = m - 1; // JS months 0-11
@@ -1095,6 +1655,9 @@
             const e = expenses.find(exp => exp.id === id);
             if (!e) return;
 
+            // Buscar histórico interno (sub-caixa) ou fallback para array vazio
+            const history = (e.paymentHistory || []).sort((a,b) => new Date(b.datePaid) - new Date(a.datePaid));
+
             const container = document.getElementById('details-content');
             container.innerHTML = `
                 <div class="flex items-center gap-4 mb-2">
@@ -1125,13 +1688,36 @@
                         <p class="text-sm font-bold text-slate-800 mb-3">Comprovantes Anexados</p>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             ${e.receiptImages.map((img, idx) => `
-                                <div onclick='openGallery(${JSON.stringify(e.receiptImages)}, ${idx})' class="aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-600 cursor-pointer hover:opacity-80 transition-opacity">
-                                    <img src="${img}" class="w-full h-full object-cover">
+                                <div onclick='openGallery("${e.id}", ${idx})' class="aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-600 cursor-pointer hover:opacity-80 transition-opacity">
+                                    ${img.startsWith('data:application/pdf') ? 
+                                        '<div class="w-full h-full bg-red-50 flex flex-col items-center justify-center text-red-500"><span class="text-2xl font-bold">PDF</span></div>' : 
+                                        `<img src="${img}" class="w-full h-full object-cover">`
+                                    }
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 ` : ''}
+
+                <!-- Seção Histórico -->
+                <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
+                    <button onclick="document.getElementById('history-list').classList.toggle('hidden')" class="flex items-center justify-between w-full text-left group">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider group-hover:text-indigo-600 transition-colors">Histórico de Pagamentos (${history.length})</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 group-hover:text-indigo-600"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    
+                    <div id="history-list" class="hidden mt-4 space-y-2">
+                        ${history.length > 0 ? history.map(h => `
+                            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-transparent hover:border-indigo-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200">${h.datePaid.split('-').reverse().join('/')} <span class="text-xs text-slate-400 font-normal">(Ref: ${h.originalDate.split('-').reverse().join('/')})</span></span>
+                                </div>
+                                <span class="text-sm font-bold text-emerald-600">R$ ${parseFloat(h.amount).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                            </div>
+                        `).join('') : '<p class="text-xs text-slate-400 italic py-2">Nenhum histórico encontrado.</p>'}
+                    </div>
+                </div>
             `;
             toggleModal('details-modal', true);
         }
