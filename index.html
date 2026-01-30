@@ -380,6 +380,14 @@
                         <span>Restaurar Arquivo</span>
                     </button>
                 </div>
+
+                <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-700">
+                    <button onclick="migrateToStorage()" id="migrate-btn" class="w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-slate-100 hover:border-purple-500 hover:bg-purple-50 text-slate-700 font-bold transition-all group dark:border-slate-600 dark:text-slate-300 dark:hover:bg-purple-900/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400 group-hover:text-purple-600"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m12 12 4 4 4-4"/><path d="M16 12v9"/></svg>
+                        <span>Otimizar Anexos (Nuvem)</span>
+                    </button>
+                    <p id="migrate-status" class="text-xs text-center text-slate-400 mt-2"></p>
+                </div>
             </div>
 
             <div class="mt-6 text-center">
@@ -487,6 +495,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue, remove, update, get, child } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBr1A7LaeWb0r6S2OeaMm65JY4a5rYGNIo",
@@ -502,10 +511,11 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const db = getDatabase(app);
+        const storage = getStorage(app);
 
         // Initialize App Logic with Firebase
         if (window.initAppWithFirebase) {
-            window.initAppWithFirebase({ db, ref, set, onValue, remove, update, get, child });
+            window.initAppWithFirebase({ db, ref, set, onValue, remove, update, get, child, storage, sRef, uploadBytes, getDownloadURL });
         }
     </script>
 
@@ -543,7 +553,11 @@
                 if (val) {
                     // Convert Object Map to Array and Sort by ID (Timestamp) descending
                     expenses = Object.values(val).sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
-                    localStorage.setItem('offline_cache', JSON.stringify(expenses)); // Salva cache para uso offline
+                    try {
+                        localStorage.setItem('offline_cache', JSON.stringify(expenses)); // Salva cache para uso offline
+                    } catch (e) {
+                        console.warn('Cache offline cheio (QuotaExceeded). O app continuará funcionando online.');
+                    }
                 } else {
                     // Migration: Upload LocalStorage if DB is empty
                     const localData = localStorage.getItem('finances_data');
@@ -848,7 +862,11 @@
             }
             
             // Salva no cache local para persistir se fechar o app
-            localStorage.setItem('offline_cache', JSON.stringify(expenses));
+            try {
+                localStorage.setItem('offline_cache', JSON.stringify(expenses));
+            } catch (e) {
+                console.warn('Não foi possível atualizar o cache offline (QuotaExceeded).');
+            }
             renderView();
         }
 
@@ -1394,7 +1412,6 @@
 
             // Migração de dados antigos (adiciona status se não existir)
             expenses = expenses.map(e => ({ ...e, status: e.status || 'pending' }));
-            localStorage.setItem('finances_data', JSON.stringify(expenses));
 
             const filtered = expenses.filter(e => {
                 const matchSearch = e.title.toLowerCase().includes(searchTerm) || (e.notes || '').toLowerCase().includes(searchTerm);
@@ -1704,29 +1721,70 @@
         }
 
         async function processFile(file) {
+            // Verifica se está online e com Firebase configurado para tentar upload
+            const canUpload = navigator.onLine && firebaseApi && firebaseApi.storage;
+
+            if (canUpload) {
+                try {
+                    let fileToUpload = file;
+                    
+                    // Se for imagem, comprime antes de enviar
+                    if (file.type.startsWith('image/')) {
+                        fileToUpload = await compressImage(file);
+                    }
+
+                    // Upload para Firebase Storage
+                    const { storage, sRef, uploadBytes, getDownloadURL } = firebaseApi;
+                    const ext = file.name.split('.').pop();
+                    const filename = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`;
+                    const storageRef = sRef(storage, `receipts/${currentUser || 'anon'}/${filename}`);
+                    
+                    updateSyncStatus('saving'); // Mostra ícone de salvando
+                    const snapshot = await uploadBytes(storageRef, fileToUpload);
+                    const url = await getDownloadURL(snapshot.ref);
+                    updateSyncStatus('synced');
+                    
+                    return url; // Retorna a URL da nuvem
+                } catch (e) {
+                    console.error("Erro no upload, usando fallback local:", e);
+                    // Se falhar o upload, cai para o Base64 abaixo
+                }
+            }
+
+            // Fallback Offline ou PDF sem upload: Base64 (Modo Antigo)
             if (file.type === 'application/pdf') {
                 return await readFileAsBase64(file);
             } else {
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            let width = img.width; let height = img.height;
-                            const MAX_SIZE = 800;
-                            if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } }
-                            else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
-                            canvas.width = width; canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-                            resolve(canvas.toDataURL('image/jpeg', 0.7));
-                        };
-                        img.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                });
+                // Reutiliza a lógica de compressão mas retorna Base64
+                const blob = await compressImage(file);
+                return await readFileAsBase64(blob);
             }
+        }
+
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width; let height = img.height;
+                        const MAX_SIZE = 1024; // Aumentei um pouco a qualidade para Storage
+                        if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } }
+                        else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Converte para Blob (Arquivo) para upload
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, 'image/jpeg', 0.8);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         function handleFiles(files) {
@@ -2175,6 +2233,110 @@
             };
             reader.readAsText(file);
             input.value = '';
+        }
+
+        async function migrateToStorage() {
+            if (!navigator.onLine || !firebaseApi || !firebaseApi.storage) {
+                return alert("A migração para a nuvem requer conexão com a internet e o serviço de armazenamento ativo.");
+            }
+            if (!confirm("Isso irá mover todos os comprovantes anexados (imagens e PDFs) para a nuvem (Firebase Storage) para economizar espaço. Esta ação pode demorar um pouco e não pode ser desfeita. Deseja continuar?")) {
+                return;
+            }
+
+            const migrateBtn = document.getElementById('migrate-btn');
+            const migrateStatus = document.getElementById('migrate-status');
+            migrateBtn.disabled = true;
+            migrateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            let filesMigrated = 0;
+            let totalFiles = 0;
+
+            // Helper to convert data URL to blob
+            function dataURLtoBlob(dataurl) {
+                var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                    bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+                while(n--){
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new Blob([u8arr], {type:mime});
+            }
+
+            // Helper to upload a blob and get URL
+            async function uploadBlob(blob) {
+                const { storage, sRef, uploadBytes, getDownloadURL } = firebaseApi;
+                const ext = blob.type.split('/')[1] || 'bin';
+                const filename = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`;
+                const storageRef = sRef(storage, `receipts/${currentUser || 'anon'}/${filename}`);
+                
+                const snapshot = await uploadBytes(storageRef, blob);
+                return await getDownloadURL(snapshot.ref);
+            }
+
+            const expensesToUpdate = JSON.parse(JSON.stringify(expenses));
+
+            // Count total files first
+            for (const expense of expensesToUpdate) {
+                if (expense.receiptImages) totalFiles += expense.receiptImages.filter(img => img.startsWith('data:')).length;
+                if (expense.paymentHistory) {
+                    for (const historyItem of expense.paymentHistory) {
+                        if (historyItem.receiptImages) totalFiles += historyItem.receiptImages.filter(img => img.startsWith('data:')).length;
+                    }
+                }
+            }
+
+            if (totalFiles === 0) {
+                migrateStatus.innerText = "Nenhum arquivo local para migrar.";
+                migrateBtn.disabled = false;
+                migrateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+
+            migrateStatus.innerText = `Iniciando migração de ${totalFiles} arquivos...`;
+
+            for (const expense of expensesToUpdate) {
+                if (expense.receiptImages) {
+                    expense.receiptImages = await Promise.all(expense.receiptImages.map(async (img) => {
+                        if (img.startsWith('data:')) {
+                            filesMigrated++;
+                            migrateStatus.innerText = `Migrando ${filesMigrated} de ${totalFiles}...`;
+                            return uploadBlob(dataURLtoBlob(img)).catch(e => { console.error(e); return img; }); // Keep old on fail
+                        }
+                        return img;
+                    }));
+                }
+                if (expense.paymentHistory) {
+                    for (const historyItem of expense.paymentHistory) {
+                        if (historyItem.receiptImages) {
+                            historyItem.receiptImages = await Promise.all(historyItem.receiptImages.map(async (img) => {
+                                if (img.startsWith('data:')) {
+                                    filesMigrated++;
+                                    migrateStatus.innerText = `Migrando ${filesMigrated} de ${totalFiles}...`;
+                                    return uploadBlob(dataURLtoBlob(img)).catch(e => { console.error(e); return img; }); // Keep old on fail
+                                }
+                                return img;
+                            }));
+                        }
+                    }
+                }
+            }
+
+            try {
+                migrateStatus.innerText = 'Finalizando... Salvando na nuvem.';
+                const updates = {};
+                expensesToUpdate.forEach(p => updates[p.id] = p);
+                const { db, ref, set } = firebaseApi;
+                await set(ref(db, `expenses/${currentUser}`), updates);
+                
+                migrateStatus.innerText = `Sucesso! ${filesMigrated} arquivos foram otimizados.`;
+                alert('Migração concluída com sucesso!');
+            } catch (e) {
+                console.error("Erro ao salvar dados migrados no Firebase:", e);
+                migrateStatus.innerText = 'Erro ao salvar na nuvem. Tente novamente.';
+                alert('Ocorreu um erro ao salvar os dados finais na nuvem. Verifique o console para mais detalhes.');
+            } finally {
+                migrateBtn.disabled = false;
+                migrateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
         }
 
         function calculateNextDue(lastDate, recurrence, dueDay, recurrenceDays) {
