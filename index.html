@@ -1608,8 +1608,8 @@
                 // Processar novos arquivos
                 if (fileInput.files.length > 0) {
                     for (const file of fileInput.files) {
-                        const base64 = await readFileAsBase64(file);
-                        historyItem.receiptImages.push(base64);
+                        const result = await processFile(file);
+                        historyItem.receiptImages.push(result);
                     }
                 }
                 
